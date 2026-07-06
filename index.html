@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tính tiền điện sinh hoạt - EVN</title>
+
+    <!-- Font & Icons (Google Font & Font Awesome) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .card {
+            max-width: 820px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0, 50, 80, 0.10);
+            padding: 40px 36px 48px;
+            transition: all 0.25s ease;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .logo-svg {
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+        }
+
+        .header-text {
+            flex: 1;
+        }
+
+        .header-text h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #0b2b44;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        .header-text .sub {
+            font-size: 15px;
+            font-weight: 500;
+            color: #3a6b8c;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        .header-text .sub i {
+            font-size: 14px;
+            color: #f5a623;
+        }
+
+        /* Input area */
+        .input-area {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 24px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 18px 20px;
+            margin-bottom: 28px;
+            border: 1px solid #e2edf5;
+        }
+
+        .input-group {
+            flex: 2 1 220px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f4a6b;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .input-group .input-with-icon {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1.5px solid #d0e0eb;
+            transition: border 0.2s;
+            overflow: hidden;
+        }
+
+        .input-group .input-with-icon:focus-within {
+            border-color: #1f8b4c;
+            box-shadow: 0 0 0 3px rgba(31, 139, 76, 0.15);
+        }
+
+        .input-group .input-with-icon i {
+            padding: 0 14px;
+            color: #5f8aa8;
+            font-size: 16px;
+            background: #f2f6fa;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            border-right: 1px solid #d0e0eb;
+        }
+
+        .input-group input {
+            border: none;
+            outline: none;
+            padding: 14px 16px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #0b2b44;
+            width: 100%;
+            background: transparent;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-group input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .input-group input[type="number"]::-webkit-outer-spin-button,
+        .input-group input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .input-group .unit {
+            padding: 0 14px;
+            font-weight: 600;
+            color: #1f4a6b;
+            background: #f2f6fa;
+            border-left: 1px solid #d0e0eb;
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+        }
+
+        .vat-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #ffffff;
+            padding: 8px 16px 8px 18px;
+            border-radius: 40px;
+            border: 1.5px solid #d0e0eb;
+            flex: 0 1 auto;
+            height: 54px;
+            cursor: pointer;
+            transition: border 0.2s, background 0.2s;
+        }
+
+        .vat-group:hover {
+            border-color: #1f8b4c;
+            background: #f6fafd;
+        }
+
+        .vat-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #1f8b4c;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .vat-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1f4a6b;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-calc {
+            flex: 0 1 auto;
+            background: #1f8b4c;
+            color: #fff;
+            border: none;
+            border-radius: 40px;
+            padding: 0 36px;
+            height: 54px;
+            font-size: 17px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(31, 139, 76, 0.25);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .btn-calc:hover {
+            background: #16733e;
+            box-shadow: 0 6px 16px rgba(31, 139, 76, 0.30);
+        }
+
+        .btn-calc:active {
+            transform: scale(0.96);
+        }
+
+        .btn-calc i {
+            font-size: 18px;
+        }
+
+        /* Result area */
+        .result-area {
+            margin-top: 12px;
+        }
+
+        .result-summary {
+            background: #e9f4eb;
+            border-radius: 20px;
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            margin-bottom: 24px;
+            border-left: 6px solid #1f8b4c;
+        }
+
+        .result-summary .total-label {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0b2b44;
+        }
+
+        .result-summary .total-amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0b2b44;
+            letter-spacing: -0.3px;
+        }
+
+        .result-summary .total-amount span {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1f4a6b;
+            margin-left: 4px;
+        }
+
+        .result-detail {
+            background: #fafcfe;
+            border-radius: 20px;
+            border: 1px solid #e2edf5;
+            overflow: hidden;
+        }
+
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+
+        .detail-table th {
+            background: #f2f8fc;
+            color: #1f4a6b;
+            font-weight: 600;
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 2px solid #d5e3ed;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+
+        .detail-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e9edf2;
+            color: #1f3a4f;
+        }
+
+        .detail-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .detail-table .highlight-total {
+            background: #f2faf5;
+            font-weight: 600;
+            border-top: 2px solid #b8d5c4;
+        }
+
+        .detail-table .highlight-total td {
+            padding: 16px 16px;
+            color: #0b2b44;
+        }
+
+        .detail-table .empty-row td {
+            color: #7f9ab0;
+            text-align: center;
+            padding: 32px 16px;
+            font-style: italic;
+        }
+
+        .badge-bac {
+            display: inline-block;
+            background: #dceaf5;
+            color: #1f4a6b;
+            border-radius: 40px;
+            padding: 2px 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Reference price table */
+        .ref-section {
+            margin-top: 30px;
+            border-top: 1px dashed #d5e3ed;
+            padding-top: 24px;
+        }
+
+        .ref-section summary {
+            font-weight: 600;
+            color: #1f4a6b;
+            cursor: pointer;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+        }
+
+        .ref-section summary i {
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        .ref-section details[open] summary i {
+            transform: rotate(90deg);
+        }
+
+        .ref-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin-top: 14px;
+        }
+
+        .ref-table th {
+            background: #f2f6fa;
+            color: #1f4a6b;
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #d5e3ed;
+        }
+
+        .ref-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid #e9edf2;
+            color: #1f3a4f;
+        }
+
+        .ref-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .ref-table .price {
+            font-weight: 500;
+            color: #0b2b44;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            font-size: 13px;
+            color: #5f8aa8;
+            text-align: center;
+            border-top: 1px solid #e2edf5;
+            padding-top: 18px;
+        }
+
+        .footer-note i {
+            color: #f5a623;
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .card {
+                padding: 24px 18px 32px;
+            }
+
+            .header-text h1 {
+                font-size: 22px;
+            }
+
+            .input-area {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 20px;
+            }
+
+            .input-group {
+                flex: 1 1 auto;
+            }
+
+            .vat-group {
+                flex: 0 0 auto;
+                height: 48px;
+                justify-content: center;
+            }
+
+            .btn-calc {
+                justify-content: center;
+                height: 50px;
+                padding: 0 20px;
+                font-size: 16px;
+            }
+
+            .result-summary {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .result-summary .total-amount {
+                font-size: 24px;
+            }
+
+            .detail-table {
+                font-size: 14px;
+            }
+
+            .detail-table th,
+            .detail-table td {
+                padding: 10px 12px;
+            }
+        }
+
+        @media (max-width: 460px) {
+            .header {
+                gap: 12px;
+            }
+            .logo-svg {
+                width: 48px;
+                height: 48px;
+            }
+            .header-text h1 {
+                font-size: 19px;
+            }
+            .header-text .sub {
+                font-size: 13px;
+            }
+            .btn-calc {
+                font-size: 15px;
+                padding: 0 16px;
+            }
+            .input-group input {
+                font-size: 16px;
+                padding: 12px 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+
+        <!-- Header with EVN logo -->
+        <div class="header">
+            <!-- Biểu tượng Điện lực Việt Nam (SVG) -->
+            <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="48" fill="#1a6e3a" stroke="#fff" stroke-width="3" />
+                <path d="M38 60 L48 44 L44 44 L54 30 L50 44 L56 44 L44 60 L48 60 L38 60Z"
+                fill="#FFD700" stroke="#FFD700" stroke-width="2" stroke-linejoin="round" />
+                <path d="M34 70 L66 70 L66 64 L34 64 L34 70Z" fill="#fff" opacity="0.9" />
+                <rect x="34" y="72" width="32" height="6" rx="2" fill="#fff" opacity="0.8" />
+                <rect x="40" y="78" width="20" height="6" rx="2" fill="#fff" opacity="0.7" />
+            </svg>
+
+            <div class="header-text">
+                <h1>Tính tiền điện sinh hoạt</h1>
+                <div class="sub">
+                    <i class="fas fa-bolt"></i> Theo biểu giá bậc thang của Điện lực Việt Nam
+                </div>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="input-area">
+            <div class="input-group">
+                <label for="kwhInput"><i class="fas fa-plug" style="margin-right: 6px;"></i> Số kWh tiêu thụ</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-bolt"></i>
+                    <input type="number" id="kwhInput" placeholder="Ví dụ: 350" min="0" step="1" value="350" />
+                    <span class="unit">kWh</span>
+                </div>
+            </div>
+
+            <div class="vat-group" id="vatToggle">
+                <input type="checkbox" id="vatCheck" checked />
+                <label for="vatCheck"><i class="fas fa-percent" style="color:#1f8b4c;"></i> Bao gồm VAT 10%</label>
+            </div>
+
+            <button class="btn-calc" id="calcBtn">
+                <i class="fas fa-calculator"></i> Tính
+            </button>
+        </div>
+
+        <!-- Result -->
+        <div class="result-area" id="resultArea">
+            <!-- Summary -->
+            <div class="result-summary">
+                <span class="total-label"><i class="fas fa-file-invoice" style="margin-right: 8px;"></i>Tổng tiền điện</span>
+                <span class="total-amount" id="totalDisplay">0 <span>đ</span></span>
+            </div>
+
+            <!-- Detail table -->
+            <div class="result-detail">
+                <table class="detail-table" id="detailTable">
+                    <thead>
+                        <tr>
+                            <th>Bậc</th>
+                            <th>Mức sử dụng</th>
+                            <th>Điện năng (kWh)</th>
+                            <th>Đơn giá (đ/kWh)</th>
+                            <th style="text-align: right;">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailBody">
+                        <tr class="empty-row">
+                            <td colspan="5">Nhập số kWh và nhấn "Tính" để xem chi tiết</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bảng giá tham khảo (có thể mở rộng) -->
+        <div class="ref-section">
+            <details>
+                <summary><i class="fas fa-chevron-right"></i> Bảng giá điện sinh hoạt (tham khảo)</summary>
+                <table class="ref-table">
+                    <thead>
+                        <tr><th>Bậc</th><th>Mức sử dụng</th><th>Giá bán (đ/kWh)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>0 – 50 kWh</td><td class="price">1.984</td></tr>
+                        <tr><td>2</td><td>51 – 100 kWh</td><td class="price">2.050</td></tr>
+                        <tr><td>3</td><td>101 – 200 kWh</td><td class="price">2.380</td></tr>
+                        <tr><td>4</td><td>201 – 300 kWh</td><td class="price">2.998</td></tr>
+                        <tr><td>5</td><td>301 – 400 kWh</td><td class="price">3.350</td></tr>
+                        <tr><td>6</td><td>401 kWh trở lên</td><td class="price">3.460</td></tr>
+                    </tbody>
+                </table>
+            </details>
+        </div>
+
+        <div class="footer-note">
+            <i class="fas fa-bolt"></i> Đơn giá theo Quyết định của EVN &nbsp;|&nbsp; Created by Võ Thanh Đậm
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Bảng giá bậc thang
+            const PRICE_TIERS = [
+                { min: 0, max: 50, price: 1984 },
+                { min: 51, max: 100, price: 2050 },
+                { min: 101, max: 200, price: 2380 },
+                { min: 201, max: 300, price: 2998 },
+                { min: 301, max: 400, price: 3350 },
+                { min: 401, max: Infinity, price: 3460 }
+            ];
+
+            const vatCheck = document.getElementById('vatCheck');
+            const kwhInput = document.getElementById('kwhInput');
+            const calcBtn = document.getElementById('calcBtn');
+            const totalDisplay = document.getElementById('totalDisplay');
+            const detailBody = document.getElementById('detailBody');
+
+            // Hàm định dạng số có dấu phân cách
+            function formatNumber(num) {
+                return num.toLocaleString('vi-VN');
+            }
+
+            // Hàm tính tiền điện
+            function calculateBill(kwh, includeVat) {
+                let remaining = kwh;
+                let total = 0;
+                const details = [];
+
+                for (let i = 0; i < PRICE_TIERS.length; i++) {
+                    const tier = PRICE_TIERS[i];
+                    let used = 0;
+                    if (remaining <= 0) break;
+
+                    if (tier.max === Infinity) {
+                        used = remaining;
+                    } else {
+                        const maxInTier = tier.max - tier.min + 1;
+                        used = Math.min(remaining, maxInTier);
+                    }
+
+                    if (used > 0) {
+                        const amount = used * tier.price;
+                        total += amount;
+                        details.push({
+                            tier: i + 1,
+                            range: tier.max === Infinity ? `${tier.min} kWh trở lên` : `${tier.min} – ${tier.max} kWh`,
+                            used: used,
+                            price: tier.price,
+                            amount: amount
+                        });
+                        remaining -= used;
+                    }
+                }
+
+                // Nếu có VAT
+                let vatAmount = 0;
+                let totalWithVat = total;
+                if (includeVat) {
+                    vatAmount = total * 0.1;
+                    totalWithVat = total + vatAmount;
+                }
+
+                return {
+                    details,
+                    total,
+                    vatAmount,
+                    totalWithVat
+                };
+            }
+
+            // Hàm render kết quả
+            function renderResult(kwh) {
+                const includeVat = vatCheck.checked;
+                const result = calculateBill(kwh, includeVat);
+
+                // Cập nhật tổng
+                const totalValue = result.totalWithVat;
+                totalDisplay.innerHTML = `${formatNumber(Math.round(totalValue))} <span>đ</span>`;
+
+                // Tạo bảng chi tiết
+                let html = '';
+                if (result.details.length === 0) {
+                    html = `<tr class="empty-row"><td colspan="5">Không có dữ liệu</td></tr>`;
+                } else {
+                    result.details.forEach((d, index) => {
+                        const isLast = index === result.details.length - 1;
+                        html += `
+                                <tr>
+                                    <td><span class="badge-bac">Bậc ${d.tier}</span></td>
+                                    <td>${d.range}</td>
+                                    <td>${d.used}</td>
+                                    <td>${formatNumber(d.price)}</td>
+                                    <td style="text-align: right; font-weight: 500;">${formatNumber(Math.round(d.amount))}</td>
+                                </tr>
+                            `;
+                    });
+
+                    // Thêm dòng VAT nếu có
+                    if (includeVat && result.vatAmount > 0) {
+                        html += `
+                                <tr>
+                                    <td colspan="4" style="text-align: right; font-weight: 600;">VAT 10%</td>
+                                    <td style="text-align: right; font-weight: 500;">${formatNumber(Math.round(result.vatAmount))}</td>
+                                </tr>
+                            `;
+                    }
+
+                    // Dòng tổng
+                    html += `
+                            <tr class="highlight-total">
+                                <td colspan="4" style="text-align: right; font-weight: 700;">TỔNG CỘNG</td>
+                                <td style="text-align: right; font-weight: 700; font-size: 18px;">${formatNumber(Math.round(result.totalWithVat))}</td>
+                            </tr>
+                        `;
+                }
+
+                detailBody.innerHTML = html;
+            }
+
+            // Hàm xử lý tính toán
+            function handleCalculate() {
+                let raw = kwhInput.value.trim();
+                if (raw === '') {
+                    raw = '0';
+                }
+                const kwh = Number(raw);
+                if (isNaN(kwh) || kwh < 0) {
+                    alert('Vui lòng nhập số kWh hợp lệ (lớn hơn hoặc bằng 0).');
+                    return;
+                }
+                renderResult(kwh);
+            }
+
+            // Sự kiện
+            calcBtn.addEventListener('click', handleCalculate);
+
+            // Nhấn Enter trong input
+            kwhInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleCalculate();
+                }
+            });
+
+            // Khi checkbox VAT thay đổi, tự động tính lại nếu đã có kết quả
+            vatCheck.addEventListener('change', () => {
+                const raw = kwhInput.value.trim();
+                if (raw !== '' && !isNaN(Number(raw)) && Number(raw) >= 0) {
+                    handleCalculate();
+                }
+            });
+
+            // Khởi tạo với giá trị mặc định 350 kWh
+            kwhInput.value = '350';
+            handleCalculate();
+        })();
+    </script>
+
+</body>
+</html>
