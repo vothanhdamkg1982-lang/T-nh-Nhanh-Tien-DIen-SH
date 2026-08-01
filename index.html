@@ -489,7 +489,6 @@
 
         <!-- Header with EVN logo -->
         <div class="header">
-            <!-- Biểu tượng Điện lực Việt Nam (SVG) -->
             <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="50" cy="50" r="48" fill="#1a6e3a" stroke="#fff" stroke-width="3" />
                 <path d="M38 60 L48 44 L44 44 L54 30 L50 44 L56 44 L44 60 L48 60 L38 60Z"
@@ -513,14 +512,14 @@
                 <label for="kwhInput"><i class="fas fa-plug" style="margin-right: 6px;"></i> Số kWh tiêu thụ</label>
                 <div class="input-with-icon">
                     <i class="fas fa-bolt"></i>
-                    <input type="number" id="kwhInput" placeholder="Ví dụ: 350" min="0" step="1" value="350" />
+                    <input type="number" id="kwhInput" placeholder="Ví dụ: 252" min="0" step="1" value="252" />
                     <span class="unit">kWh</span>
                 </div>
             </div>
 
             <div class="vat-group" id="vatToggle">
                 <input type="checkbox" id="vatCheck" checked />
-                <label for="vatCheck"><i class="fas fa-percent" style="color:#1f8b4c;"></i> Bao gồm VAT 10%</label>
+                <label for="vatCheck"><i class="fas fa-percent" style="color:#1f8b4c;"></i> Bao gồm VAT 8%</label>
             </div>
 
             <button class="btn-calc" id="calcBtn">
@@ -532,7 +531,7 @@
         <div class="result-area" id="resultArea">
             <!-- Summary -->
             <div class="result-summary">
-                <span class="total-label"><i class="fas fa-file-invoice" style="margin-right: 8px;"></i>Tổng tiền điện</span>
+                <span class="total-label"><i class="fas fa-file-invoice" style="margin-right: 8px;"></i>Tổng tiền điện thanh toán</span>
                 <span class="total-amount" id="totalDisplay">0 <span>đ</span></span>
             </div>
 
@@ -557,7 +556,7 @@
             </div>
         </div>
 
-        <!-- Bảng giá tham khảo (có thể mở rộng) -->
+        <!-- Bảng giá tham khảo -->
         <div class="ref-section">
             <details>
                 <summary><i class="fas fa-chevron-right"></i> Bảng giá điện sinh hoạt (tham khảo)</summary>
@@ -584,14 +583,14 @@
 
     <script>
         (function() {
-            // Bảng giá bậc thang
-            const PRICE_TIERS = [
-                { min: 0, max: 50, price: 1984 },
-                { min: 51, max: 100, price: 2050 },
-                { min: 101, max: 200, price: 2380 },
-                { min: 201, max: 300, price: 2998 },
-                { min: 301, max: 400, price: 3350 },
-                { min: 401, max: Infinity, price: 3460 }
+            // Định nghĩa các bậc thang điện sinh hoạt theo đúng quy chuẩn EVN
+            const TIERS = [
+                { limit: 50, price: 1984, label: "0 – 50 kWh" },
+                { limit: 50, price: 2050, label: "51 – 100 kWh" },
+                { limit: 100, price: 2380, label: "101 – 200 kWh" },
+                { limit: 100, price: 2998, label: "201 – 300 kWh" },
+                { limit: 100, price: 3350, label: "301 – 400 kWh" },
+                { limit: Infinity, price: 3460, label: "401 kWh trở lên" }
             ];
 
             const vatCheck = document.getElementById('vatCheck');
@@ -600,109 +599,101 @@
             const totalDisplay = document.getElementById('totalDisplay');
             const detailBody = document.getElementById('detailBody');
 
-            // Hàm định dạng số có dấu phân cách
             function formatNumber(num) {
                 return num.toLocaleString('vi-VN');
             }
 
-            // Hàm tính tiền điện
-            function calculateBill(kwh, includeVat) {
-                let remaining = kwh;
-                let total = 0;
+            function calculateBill(totalKwh, includeVat) {
+                let remainingKwh = totalKwh;
+                let subTotal = 0;
                 const details = [];
 
-                for (let i = 0; i < PRICE_TIERS.length; i++) {
-                    const tier = PRICE_TIERS[i];
-                    let used = 0;
-                    if (remaining <= 0) break;
-
-                    if (tier.max === Infinity) {
-                        used = remaining;
-                    } else {
-                        const maxInTier = tier.max - tier.min + 1;
-                        used = Math.min(remaining, maxInTier);
-                    }
-
-                    if (used > 0) {
-                        const amount = used * tier.price;
-                        total += amount;
+                for (let i = 0; i < TIERS.length; i++) {
+                    if (remainingKwh <= 0) break;
+                    
+                    const tier = TIERS[i];
+                    const kwhInThisTier = tier.limit === Infinity ? remainingKwh : Math.min(remainingKwh, tier.limit);
+                    
+                    if (kwhInThisTier > 0) {
+                        const amount = kwhInThisTier * tier.price;
+                        subTotal += amount;
                         details.push({
                             tier: i + 1,
-                            range: tier.max === Infinity ? `${tier.min} kWh trở lên` : `${tier.min} – ${tier.max} kWh`,
-                            used: used,
+                            range: tier.label,
+                            used: kwhInThisTier,
                             price: tier.price,
                             amount: amount
                         });
-                        remaining -= used;
+                        remainingKwh -= kwhInThisTier;
                     }
                 }
 
-                // Nếu có VAT
                 let vatAmount = 0;
-                let totalWithVat = total;
                 if (includeVat) {
-                    vatAmount = total * 0.1;
-                    totalWithVat = total + vatAmount;
+                    vatAmount = subTotal * 0.08; // Thuế suất VAT 8%
                 }
+                const totalWithVat = subTotal + vatAmount;
 
                 return {
                     details,
-                    total,
+                    subTotal,
                     vatAmount,
                     totalWithVat
                 };
             }
 
-            // Hàm render kết quả
             function renderResult(kwh) {
                 const includeVat = vatCheck.checked;
                 const result = calculateBill(kwh, includeVat);
 
-                // Cập nhật tổng
-                const totalValue = result.totalWithVat;
-                totalDisplay.innerHTML = `${formatNumber(Math.round(totalValue))} <span>đ</span>`;
+                totalDisplay.innerHTML = `${formatNumber(Math.round(result.totalWithVat))} <span>đ</span>`;
 
-                // Tạo bảng chi tiết
                 let html = '';
                 if (result.details.length === 0) {
                     html = `<tr class="empty-row"><td colspan="5">Không có dữ liệu</td></tr>`;
                 } else {
-                    result.details.forEach((d, index) => {
-                        const isLast = index === result.details.length - 1;
+                    result.details.forEach((d) => {
                         html += `
-                                <tr>
-                                    <td><span class="badge-bac">Bậc ${d.tier}</span></td>
-                                    <td>${d.range}</td>
-                                    <td>${d.used}</td>
-                                    <td>${formatNumber(d.price)}</td>
-                                    <td style="text-align: right; font-weight: 500;">${formatNumber(Math.round(d.amount))}</td>
-                                </tr>
-                            `;
-                    });
-
-                    // Thêm dòng VAT nếu có
-                    if (includeVat && result.vatAmount > 0) {
-                        html += `
-                                <tr>
-                                    <td colspan="4" style="text-align: right; font-weight: 600;">VAT 10%</td>
-                                    <td style="text-align: right; font-weight: 500;">${formatNumber(Math.round(result.vatAmount))}</td>
-                                </tr>
-                            `;
-                    }
-
-                    // Dòng tổng
-                    html += `
-                            <tr class="highlight-total">
-                                <td colspan="4" style="text-align: right; font-weight: 700;">TỔNG CỘNG</td>
-                                <td style="text-align: right; font-weight: 700; font-size: 18px;">${formatNumber(Math.round(result.totalWithVat))}</td>
+                            <tr>
+                                <td><span class="badge-bac">Bậc ${d.tier}</span></td>
+                                <td>${d.range}</td>
+                                <td>${d.used}</td>
+                                <td>${formatNumber(d.price)}</td>
+                                <td style="text-align: right; font-weight: 500;">${formatNumber(Math.round(d.amount))}</td>
                             </tr>
                         `;
+                    });
+
+                    // Dòng tổng tiền chưa thuế
+                    html += `
+                        <tr>
+                            <td colspan="4" style="text-align: right; font-weight: 600;">Tổng tiền điện chưa thuế</td>
+                            <td style="text-align: right; font-weight: 500;">${formatNumber(Math.round(result.subTotal))}</td>
+                        </tr>
+                    `;
+
+                    // Dòng VAT nếu chọn
+                    if (includeVat) {
+                        html += `
+                            <tr>
+                                <td colspan="4" style="text-align: right; font-weight: 600;">Thuế GTGT (8%)</td>
+                                <td style="text-align: right; font-weight: 500;">${formatNumber(Math.round(result.vatAmount))}</td>
+                            </tr>
+                        `;
+                    }
+
+                    // Dòng tổng cộng thanh toán
+                    html += `
+                        <tr class="highlight-total">
+                            <td colspan="4" style="text-align: right; font-weight: 700;">Tổng cộng tiền thanh toán</td>
+                            <td style="text-align: right; font-weight: 700; font-size: 18px;">${formatNumber(Math.round(result.totalWithVat))}</td>
+                        </tr>
+                    `;
                 }
 
                 detailBody.innerHTML = html;
             }
 
-            // Hàm xử lý tính toán
             function handleCalculate() {
                 let raw = kwhInput.value.trim();
                 if (raw === '') {
@@ -716,10 +707,8 @@
                 renderResult(kwh);
             }
 
-            // Sự kiện
             calcBtn.addEventListener('click', handleCalculate);
 
-            // Nhấn Enter trong input
             kwhInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -727,7 +716,6 @@
                 }
             });
 
-            // Khi checkbox VAT thay đổi, tự động tính lại nếu đã có kết quả
             vatCheck.addEventListener('change', () => {
                 const raw = kwhInput.value.trim();
                 if (raw !== '' && !isNaN(Number(raw)) && Number(raw) >= 0) {
@@ -735,11 +723,10 @@
                 }
             });
 
-            // Khởi tạo với giá trị mặc định 350 kWh
-            kwhInput.value = '350';
+            // Khởi tạo mặc định với số kWh khớp hóa đơn mẫu (252 kWh)
+            kwhInput.value = '252';
             handleCalculate();
         })();
     </script>
-
 </body>
 </html>
